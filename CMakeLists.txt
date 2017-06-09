@@ -16,7 +16,7 @@ SET(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 #
 # Find HDF5
 #
-find_package(HDF5 COMPONENTS C Fortran REQUIRED)
+find_package(HDF5 COMPONENTS C REQUIRED)
 include_directories(${HDF5_INCLUDE_DIRS})
 link_directories(${HDF5_LIBRARY_DIRS})
 
