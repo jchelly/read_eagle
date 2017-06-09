@@ -46,6 +46,9 @@ To install the python module:
 
      python ./setup.py install --prefix=/path/to/install/dir/
 
+If you use the --prefix option you'll probably need to set the environment
+variable PYTHONPATH so that python can find the module.
+
 
 Compiling the library and examples for C and Fortran
 ----------------------------------------------------
@@ -125,34 +128,6 @@ Example usage in Fortran:
 
   ! Close snapshot
   call close_snapshot(snap)
-
-
-Python
-------
-
-Edit setup.py to specify the location of HDF5 and then compile and install
-the extension module with
-
-  python ./setup.py install --prefix=<dir>
-
-which installs to the specified directory, or
-
-   python ./setup.py install --user
-
-which installs into ~/.local.
-
-On Cosma load the following modules before running to ensure
-it uses the right compiler and HDF5 version:
-
-python/2.7.3
-gnu_comp/c4
-hdf5
-
-If you use the --prefix option you'll need to set PYTHONPATH to point at
-the location where it installs _read_eagle.so. This will be in something like 
-./lib/python2.7/site-packages/ relative to the install prefix.
-
-If you use the the --user option, PYTHONPATH should not be necessary.
 
 
 Example usage in Python:
