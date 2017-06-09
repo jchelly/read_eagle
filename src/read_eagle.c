@@ -1448,7 +1448,10 @@ int get_dataset_name(EagleSnapshot *snap, int itype, int iset, char *buf, size_t
 
 
 /*
-  peano_hilbert_key() function taken from Gadget-2
+  The following code is taken from Gadget-2 (http://wwwmpa.mpa-garching.mpg.de/gadget/)
+
+  Copyright (c) 2005       Volker Springel
+                           Max-Plank-Institute for Astrophysics
 */
 
 static char quadrants[24][2][2][2] = {
@@ -1540,50 +1543,6 @@ peanokey peano_hilbert_key(int x, int y, int z, int bits)
 
   return key;
 }
-
-
-#ifdef SWIG
-/*
-  It's very inconvenient to handle output parameters and enums in SWIG, so
-  provide some extra functions here.
-
-*/
-int get_dataset_rank(EagleSnapshot *snap, int itype, char *dset_name)
-{
-  TypeCode tc;
-  int rank;
-  int res = get_extra_dataset_info(snap, itype, dset_name, &tc, &rank, NULL);
-  
-  if(res < 0)
-    return -1;
-  else
-    return rank;
-}
-
-int get_dataset_type(EagleSnapshot *snap, int itype, char *dset_name)
-{
-  TypeCode tc;
-  int rank;
-  int res = get_extra_dataset_info(snap, itype, dset_name, &tc, &rank, NULL);
-  
-  if(res < 0)
-    return -1;
-  else
-    return (int) tc;
-}
-
-#endif
-
-
-
-
-
-
-
-
-
-
-
 
 
 

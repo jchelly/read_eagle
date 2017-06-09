@@ -28,6 +28,11 @@ end
 ;
 ; Function to calculate P-H keys
 ;
+; This function is an IDL translation of the peano_hilbert_key()
+; function from Gadget-2 (http://wwwmpa.mpa-garching.mpg.de/gadget/,
+; Copyright (c) 2005 Volker Springel, Max-Plank-Institute for Astrophysics)
+;
+;
 function peano_hilbert_key, ix, iy, iz, bits
   
   quadrants = transpose(reform([ $
