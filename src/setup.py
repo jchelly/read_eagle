@@ -6,8 +6,9 @@
 # python ./setup.py install --prefix=<dir>
 #
 
-# Edit this to set the location of HDF5
-hdf5_location = "/gpfs/COSMA/hdf5/gnu_4.1.2/1.8.5-patch1/"
+# Edit this to set the location of HDF5. This directory should
+# contain the HDF5 lib/ and include/ directories.
+hdf5_location = "/usr/"
 
 from distutils.core import setup, Extension
 import numpy.distutils.misc_util
