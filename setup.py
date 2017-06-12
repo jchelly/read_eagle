@@ -19,7 +19,7 @@ ldirs             = [hdf5_location+"/lib"]
 rdirs             = ldirs
 
 read_eagle_module = Extension('_read_eagle',
-                              sources = ['_read_eagle.c','read_eagle.c'],
+                              sources = ['./src/_read_eagle.c','./src/read_eagle.c'],
                               libraries=["hdf5"],
                               include_dirs =idirs,
                               library_dirs =ldirs,
@@ -29,4 +29,5 @@ setup (name         = 'ReadEagle',
        version      = '1.0',
        description  = 'Code for reading P-H key sorted Eagle snapshots',
        ext_modules  = [read_eagle_module],
-       py_modules   = ['read_eagle'])
+       py_modules   = ['read_eagle'],
+       package_dir  = {'' : 'src'})
