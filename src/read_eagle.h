@@ -256,9 +256,4 @@ int split_selection(EagleSnapshot *snap, int ThisTask, int NTask);
 double random_double(void);
 void set_random_seed(void);
 
-#ifdef SWIG
-int get_dataset_rank(EagleSnapshot *snap, int itype, char *dset_name);
-int get_dataset_type(EagleSnapshot *snap, int itype, char *dset_name);
-#endif
-
 #endif
