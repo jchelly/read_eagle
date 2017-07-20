@@ -1,5 +1,7 @@
 #!/bin/env python
 
+from __future__ import print_function
+
 from numpy import *
 import read_eagle
 import h5py
@@ -8,6 +10,7 @@ import getopt
 
 chunk_size = 8192
 gzip_level = 6
+
 
 def create_output_groups(group, dataset):
     """Create any intermediate groups necessary to write the specified dataset"""
@@ -74,14 +77,14 @@ def extract_region(fname, sample_rate, region, datasets, outfile, types):
                 if sample_rate is not None:
                     ind = (random.rand(np) < sample_rate)
                     numpart_total[itype] = sum(ind)
-                    print
-                    print "Particle type ", itype, ", keeping ", sum(ind), " of ", len(ind)," in region"
-                    print
+                    print()
+                    print("Particle type ", itype, ", keeping ", sum(ind), " of ", len(ind)," in region")
+                    print()
                 else:
                     numpart_total[itype] = np
-                    print
-                    print "Particle type ", itype, ", keeping all ",np," in region" 
-                    print
+                    print()
+                    print("Particle type ", itype, ", keeping all ",np," in region")
+                    print()
 
                 # May be none left after sampling!
                 if numpart_total[itype] > 0:
@@ -104,7 +107,7 @@ def extract_region(fname, sample_rate, region, datasets, outfile, types):
                     # Loop over datasets to do
                     for dset_name in read_datasets:
 
-                        print "  Dataset ", dset_name
+                        print("  Dataset ", dset_name)
 
                         # May need to create intermediate groups
                         # (for element abundances etc)
@@ -138,7 +141,7 @@ def extract_region(fname, sample_rate, region, datasets, outfile, types):
 
     # Copy the header from the input.
     header = outfile.create_group("Header")
-    for (name,val) in infile["Header"].attrs.iteritems():
+    for (name,val) in infile["Header"].attrs.items():
         header.attrs[name] = val
 
     # Update particle numbers in header
@@ -161,7 +164,7 @@ def extract_region(fname, sample_rate, region, datasets, outfile, types):
                        "RuntimePars",
                        "Units"):
         group = outfile.create_group(group_name)
-        for (name,val) in infile[group_name].attrs.iteritems():
+        for (name,val) in infile[group_name].attrs.items():
             group.attrs[name] = val
 
     # Add the sampling rate to the header
@@ -185,7 +188,7 @@ def extract_region(fname, sample_rate, region, datasets, outfile, types):
 
 
 def print_usage():
-    print """
+    print("""
 
 Usage: extract_region.py [options] input_snapshot_file output_snapshot_file
 
@@ -201,17 +204,17 @@ omit that particle type or 1 to include that type in the output.
 
 Dataset names should be relative to the PartTypeX groups.
 
-"""
+""")
 
 if __name__ == "__main__":
 
     # Get command line arguments
     try:
         opts, args = getopt.gnu_getopt(sys.argv[1:], "s:r:d:t:", "")
-    except getopt.GetoptError, err:
+    except getopt.GetoptError as err:
         print_usage()
-        print str(err)
-        print
+        print(str(err))
+        print()
         sys.exit(1)
         
     sample_rate = None
@@ -233,7 +236,7 @@ if __name__ == "__main__":
         try:
             sample_rate = float(sample_rate)
         except ValueError:
-            print "Unable to interpret sample rate "+sample_rate+" as float"
+            print("Unable to interpret sample rate "+sample_rate+" as float")
             sys.exit(1)
 
     # Extract region coordinates
@@ -241,7 +244,7 @@ if __name__ == "__main__":
         try:
             region = [float(r) for r in region.split(",")]
         except ValueError:
-            print "Unable to interpret region specification "+region
+            print("Unable to interpret region specification "+region)
             sys.exit(1)
 
     # Find types to do
@@ -249,10 +252,10 @@ if __name__ == "__main__":
         try:
             types = [int(s) for s in types.split(",")]
         except ValueError:
-            print "Unable to interpret particle type specification "+types
+            print("Unable to interpret particle type specification "+types)
             sys.exit(1)
         if len(types) != 6:
-            print "Particle type specification must have 6 elements"
+            print("Particle type specification must have 6 elements")
             sys.exit(1)
 
     # Check we have an input and output file name

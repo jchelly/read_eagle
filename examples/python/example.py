@@ -4,6 +4,7 @@
 # region of an Eagle snapshot.
 #
 
+from __future__ import print_function
 import read_eagle
 
 # Location where tar file with snapshots was unpacked
@@ -24,12 +25,12 @@ itype = 0
 # Open the snapshot
 snap = read_eagle.EagleSnapshot(fname)
 
-print "# Box size = %16.8e Mpc/h" % snap.boxsize
-print "#"
-print "# Total number of gas  particles in snapshot = %d" % snap.numpart_total[0]
-print "# Total number of DM   particles in snapshot = %d" % snap.numpart_total[1]
-print "# Total number of star particles in snapshot = %d" % snap.numpart_total[4]
-print "# Total number of BH   particles in snapshot = %d" % snap.numpart_total[5]
+print ("# Box size = %16.8e Mpc/h" % snap.boxsize)
+print ("#")
+print ("# Total number of gas  particles in snapshot = %d" % snap.numpart_total[0])
+print ("# Total number of DM   particles in snapshot = %d" % snap.numpart_total[1])
+print ("# Total number of star particles in snapshot = %d" % snap.numpart_total[4])
+print ("# Total number of BH   particles in snapshot = %d" % snap.numpart_total[5])
 
 # Specify the region to read (coords. are in comoving Mpc/h)
 xmin = 0.0
@@ -41,8 +42,8 @@ zmax = 2.0
 snap.select_region(xmin, xmax, ymin, ymax, zmin, zmax)
 
 # Report number of particles which will be read
-print "#"
-print "# Number of particles in this region = %d" % snap.count_particles(itype)
+print ("#")
+print ("# Number of particles in this region = %d" % snap.count_particles(itype))
 
 #
 # Read positions and IDs of particles of type itype in the specified region.
@@ -56,7 +57,7 @@ snap.close()
 
 # Write particle data to stdout
 # Coordinates are in comoving Mpc/h.
-print "#"
-print "# ID, x, y, z"
+print ("#")
+print ("# ID, x, y, z")
 for (id, x, y, z) in zip(ids, pos[:,0], pos[:,1], pos[:,2]):
-    print id, x, y, z
+    print (id, x, y, z)
