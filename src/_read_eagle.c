@@ -6,6 +6,17 @@
 #include "numpy/arrayobject.h"
 #include "read_eagle.h"
 
+
+#if ((PY_MAJOR_VERSION == 2) && (PY_MINOR_VERSION < 7)) || (PY_MAJOR_VERSION < 2)
+/* For python < 2.7, we use the CObject API */
+#define PTR_FROM_OBJECT(x) PyCObject_AsVoidPtr((x))
+#define OBJECT_FROM_PTR(x) PyCObject_FromVoidPtr((x), NULL)
+#else
+/* For python >= 2.7, we use the Capsule API */
+#define OBJECT_FROM_PTR(x) PyCapsule_New((x), NULL, NULL)
+#define PTR_FROM_OBJECT(x) PyCapsule_GetPointer((x), NULL)
+#endif
+
 /*
   Python interface for read_eagle.c
 
@@ -53,8 +64,23 @@ static PyMethodDef _read_eagleMethods[] = {
   {NULL, NULL, 0, NULL}        /* Sentinel */
 };
 
+/* Module definition struct for Python 3 only */
+#if PY_MAJOR_VERSION >= 3
+static struct PyModuleDef moduledef = {
+  PyModuleDef_HEAD_INIT,
+  "_read_eagle",
+  NULL,
+  -1,
+  _read_eagleMethods
+};
+#endif
+
 /* Initialise the module */
+#if PY_MAJOR_VERSION >= 3
+PyMODINIT_FUNC PyInit__read_eagle(void)
+#else
 PyMODINIT_FUNC init_read_eagle(void)
+#endif
 {
   PyObject *m;
 
@@ -64,13 +90,22 @@ PyMODINIT_FUNC init_read_eagle(void)
   /* Make sure NumPy is imported and initialised */
   import_array();
 
+#if PY_MAJOR_VERSION >= 3
+  m = PyModule_Create(&moduledef);
+  if (m == NULL)
+    return NULL;
+#else
   m = Py_InitModule("_read_eagle", _read_eagleMethods);
   if (m == NULL)
     return;
+#endif
 
   _read_eagleError = PyErr_NewException("_read_eagle.error", NULL, NULL);
   Py_INCREF(_read_eagleError);
   PyModule_AddObject(m, "error", _read_eagleError);
+#if PY_MAJOR_VERSION >= 3
+  return m;
+#endif
 }
 
 /* Open a snapshot */
@@ -94,7 +129,7 @@ static PyObject *_read_eagle_open_snapshot(PyObject *self, PyObject *args)
 
   /* Return the pointer and some info about the snapshot*/
   return Py_BuildValue("NLLLLLLdii", 
-		       PyCObject_FromVoidPtr(snap, NULL),
+		       OBJECT_FROM_PTR(snap),
 		       snap->numpart_total[0],
 		       snap->numpart_total[1],
 		       snap->numpart_total[2],
@@ -114,7 +149,7 @@ static PyObject *_read_eagle_close_snapshot(PyObject *self, PyObject *args)
 
   /* Get snapshot object from arguments */
   if (!PyArg_ParseTuple(args, "O", &pysnap)) return NULL;
-  snap = (EagleSnapshot *) PyCObject_AsVoidPtr(pysnap);
+  snap = (EagleSnapshot *) PTR_FROM_OBJECT(pysnap);
 
   /* Close the snapshot */
   close_snapshot(snap);
@@ -136,7 +171,7 @@ static PyObject *_read_eagle_select_region(PyObject *self, PyObject *args)
   if (!PyArg_ParseTuple(args, "Odddddd", &pysnap,
 			&xmin, &xmax, &ymin, &ymax, &zmin, &zmax))
     return NULL;
-  snap = (EagleSnapshot *) PyCObject_AsVoidPtr(pysnap);
+  snap = (EagleSnapshot *) PTR_FROM_OBJECT(pysnap);
 
   /* Select the cells */
   select_region(snap, xmin, xmax, ymin, ymax, zmin, zmax);
@@ -158,7 +193,7 @@ static PyObject *_read_eagle_select_rotated_region(PyObject *self, PyObject *arg
 			&xx,&xy,&xz,&yx,&yy,&yz,&zx,&zy,&zz,
 			&lx,&ly,&lz))
     return NULL;
-  snap = (EagleSnapshot *) PyCObject_AsVoidPtr(pysnap);
+  snap = (EagleSnapshot *) PTR_FROM_OBJECT(pysnap);
 
   double centre[3] = {cx, cy, cz};
   double xvec[3]   = {xx, xy, xz};
@@ -186,7 +221,7 @@ static PyObject *_read_eagle_select_grid_cells(PyObject *self, PyObject *args)
   if (!PyArg_ParseTuple(args, "Oiiiiii", &pysnap,
 			&ixmin, &ixmax, &iymin, &iymax, &izmin, &izmax))
     return NULL;
-  snap = (EagleSnapshot *) PyCObject_AsVoidPtr(pysnap);
+  snap = (EagleSnapshot *) PTR_FROM_OBJECT(pysnap);
 
   /* Select the cells */
   select_grid_cells(snap, ixmin, ixmax, iymin, iymax, izmin, izmax);
@@ -205,7 +240,7 @@ static PyObject *_read_eagle_set_sampling_rate(PyObject *self, PyObject *args)
   /* Get snapshot and sample rate from arguments */
   if (!PyArg_ParseTuple(args, "Od", &pysnap, &rate))
     return NULL;
-  snap = (EagleSnapshot *) PyCObject_AsVoidPtr(pysnap);
+  snap = (EagleSnapshot *) PTR_FROM_OBJECT(pysnap);
 
   /* Set the sampling rate */
   set_sampling_rate(snap, rate);
@@ -223,7 +258,7 @@ static PyObject *_read_eagle_clear_selection(PyObject *self, PyObject *args)
 
   /* Get snapshot object from arguments */
   if (!PyArg_ParseTuple(args, "O", &pysnap)) return NULL;
-  snap = (EagleSnapshot *) PyCObject_AsVoidPtr(pysnap);
+  snap = (EagleSnapshot *) PTR_FROM_OBJECT(pysnap);
   
   clear_selection(snap);
   
@@ -241,7 +276,7 @@ static PyObject *_read_eagle_count_particles(PyObject *self, PyObject *args)
 
   /* Get snapshot object from arguments */
   if (!PyArg_ParseTuple(args, "Oi", &pysnap, &itype)) return NULL;
-  snap = (EagleSnapshot *) PyCObject_AsVoidPtr(pysnap);
+  snap = (EagleSnapshot *) PTR_FROM_OBJECT(pysnap);
   
   /* Get the particle count. n<0 indicates something bad */
   n = count_particles(snap, itype);
@@ -268,7 +303,7 @@ static PyObject *_read_eagle_get_particle_locations(PyObject *self, PyObject *ar
 
   /* Get snapshot object from arguments */
   if (!PyArg_ParseTuple(args, "Oi", &pysnap, &itype)) return NULL;
-  snap = (EagleSnapshot *) PyCObject_AsVoidPtr(pysnap);
+  snap = (EagleSnapshot *) PTR_FROM_OBJECT(pysnap);
   
   /* Get the particle count. n<0 indicates something bad */
   n = count_particles(snap, itype);
@@ -319,7 +354,7 @@ static PyObject *_read_eagle_read_dataset(PyObject *self, PyObject *args)
 
   /* Get parameters from inout arguments */
   if (!PyArg_ParseTuple(args, "Ois", &pysnap, &itype, &dset_name)) return NULL;
-  snap = (EagleSnapshot *) PyCObject_AsVoidPtr(pysnap);
+  snap = (EagleSnapshot *) PTR_FROM_OBJECT(pysnap);
   
   /* Determine number of particles to read */
   n = count_particles(snap, itype);
@@ -408,7 +443,7 @@ static PyObject *_read_eagle_read_extra_dataset(PyObject *self, PyObject *args)
 
   /* Get parameters from inout arguments */
   if (!PyArg_ParseTuple(args, "Oiss", &pysnap, &itype, &dset_name, &extra_basename)) return NULL;
-  snap = (EagleSnapshot *) PyCObject_AsVoidPtr(pysnap);
+  snap = (EagleSnapshot *) PTR_FROM_OBJECT(pysnap);
   
   /* Determine number of particles to read */
   n = count_particles(snap, itype);
@@ -480,7 +515,7 @@ static PyObject *_read_eagle_get_dataset_count(PyObject *self, PyObject *args)
 
   /* Get snapshot object and particle type from arguments */
   if (!PyArg_ParseTuple(args, "Oi", &pysnap, &itype)) return NULL;
-  snap = (EagleSnapshot *) PyCObject_AsVoidPtr(pysnap);
+  snap = (EagleSnapshot *) PTR_FROM_OBJECT(pysnap);
   
   /* Range check on itype */
   if(itype < 0 || itype > 5)
@@ -503,7 +538,7 @@ static PyObject *_read_eagle_get_dataset_name(PyObject *self, PyObject *args)
 
   /* Get snapshot object and particle type from arguments */
   if (!PyArg_ParseTuple(args, "Oii", &pysnap, &itype, &iset)) return NULL;
-  snap = (EagleSnapshot *) PyCObject_AsVoidPtr(pysnap);
+  snap = (EagleSnapshot *) PTR_FROM_OBJECT(pysnap);
   
   /* Range check on itype */
   if(itype < 0 || itype > 5)
@@ -533,7 +568,7 @@ static PyObject *_read_eagle_split_selection(PyObject *self, PyObject *args)
 
   /* Get snapshot object and communicator size/rank */
   if (!PyArg_ParseTuple(args, "Oii", &pysnap, &ThisTask, &NTask)) return NULL;
-  snap = (EagleSnapshot *) PyCObject_AsVoidPtr(pysnap);
+  snap = (EagleSnapshot *) PTR_FROM_OBJECT(pysnap);
   
   /* Call the C function */
   if(split_selection(snap, ThisTask, NTask) != 0)
