@@ -1,6 +1,6 @@
 #!/bin/env python
 #
-# This script tests the reading code by reading random regions
+# This script tests the reading code by reading several regions
 # using the python module and comparing to the result of reading
 # the files directly with h5py.
 #
@@ -9,20 +9,29 @@ import numpy as np
 import h5py
 import glob
 import read_eagle
+import hashlib
+
+
+def hash_data(data):
+
+    m = hashlib.md5()
+    for name in sorted(data.keys()):
+        m.update(data[name])
+    return m.hexdigest()
 
 
 def in_region_periodic(pos, region, boxsize):
     
     # Find centre of the region
     centre = np.asarray([0.5*(region[i*2+0]+region[i*2+1]) for i in range(3)])
-    
+
     # Wrap positions to copy nearest centre of region
-    pos_wrapped = ((pos.astype(np.float64)-centre+0.5*boxsize) % boxsize)-0.5*boxsize
+    pos_wrapped = ((pos.astype(np.float64)-centre+0.5*boxsize) % boxsize)+centre-0.5*boxsize
 
     # Check which points are in the region
-    in_region = ((pos[:,0] >= region[0]) & (pos[:,0] <= region[1]) &
-                 (pos[:,1] >= region[2]) & (pos[:,1] <= region[3]) &
-                 (pos[:,2] >= region[4]) & (pos[:,2] <= region[5]))
+    in_region = ((pos_wrapped[:,0] >= region[0]) & (pos_wrapped[:,0] <= region[1]) &
+                 (pos_wrapped[:,1] >= region[2]) & (pos_wrapped[:,1] <= region[3]) &
+                 (pos_wrapped[:,2] >= region[4]) & (pos_wrapped[:,2] <= region[5]))
     
     return in_region
 
@@ -66,6 +75,7 @@ def read_region_direct(basedir, snapnum, region, itype, datasets):
             # Get number of files from first file
             if ifile == 0:
                 nfiles = infile["Header"].attrs["NumFilesPerSnapshot"]
+                boxsize = infile["Header"].attrs["BoxSize"]
 
             # Read in the data from this file
             group = infile["PartType%d" % itype]
@@ -74,9 +84,7 @@ def read_region_direct(basedir, snapnum, region, itype, datasets):
                 data[name].append(group[name][...]) 
 
             # Discard elements not in the required region
-            in_region = ((pos[-1][:,0] >= region[0]) & (pos[-1][:,0] <= region[1]) &
-                         (pos[-1][:,1] >= region[2]) & (pos[-1][:,1] <= region[3]) &
-                         (pos[-1][:,2] >= region[4]) & (pos[-1][:,2] <= region[5]))
+            in_region = in_region_periodic(pos[-1], region, boxsize)
             pos[-1] = pos[-1][in_region,...]
             for name in datasets:
                 data[name][-1] = data[name][-1][in_region,...]
@@ -115,13 +123,38 @@ def read_region_index(basedir, snapnum, region, itype, datasets):
         data[name] = snap.read_dataset(itype, name)
 
     # Filter out any extra particles
-    in_region = ((pos[:,0] >= region[0]) & (pos[:,0] <= region[1]) &
-                 (pos[:,1] >= region[2]) & (pos[:,1] <= region[3]) &
-                 (pos[:,2] >= region[4]) & (pos[:,2] <= region[5]))
+    in_region = in_region_periodic(pos, region, snap.boxsize)
     pos = pos[in_region,...]
     for name in datasets:
         data[name] = data[name][in_region,...]
 
     return data
 
+
+if __name__ == "__main__":
+
+    # Test the code on a few regions
+    basedir  = "/cosma5/data/Eagle/DataRelease/L0025N0376/PE/REFERENCE/data/"
+    datasets = ("Coordinates","ParticleIDs","Velocity")
+    itype    = 1
+    snapnum  = 28
+    regions  = (
+        ( 16.5, 17.5, 10.3, 11.4, -3.2, 0.5),
+        ( 1,    4.,   1.,   4.,    1.,  4.),
+        (-2.1,  2.1,  7.3,  9.8,   1.0, 5.6),
+        (-2.,  -1.,  -5.,   1.,    8.5, 9.5),
+        ) 
+
+    for i,region in enumerate(regions):
+        print("Region {i:d}".format(i=i))
+        data1 = read_region_direct(basedir, snapnum, region, itype, datasets)
+        data2 = read_region_index(basedir, snapnum, region, itype, datasets)
+        # Output hash of data for easier comparison between python versions
+        print("  Hash of data from direct read = "+hash_data(data1))
+        print("  Hash of data from read_eagle  = "+hash_data(data2))
+        for name in datasets:
+            if np.all(data1[name]==data2[name]):
+                print("  Region {i:d} dataset {name:s} is ok".format(i=i,name=name))
+            else:
+                raise Exception("Region {i:d}, dataset {name:s}: MISMATCH!".format(i=i, name=name))
 
