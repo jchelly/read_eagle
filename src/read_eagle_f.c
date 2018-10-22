@@ -111,7 +111,11 @@ void FC_GLOBAL(readdatasetf, READDATASETF)(long long *nread, EagleSnapshot **sna
     dtype_id = H5T_NATIVE_FLOAT;
   else if(*typecode==3)
     dtype_id = H5T_NATIVE_DOUBLE;
-  
+  else if(*typecode==4)
+    dtype_id = H5T_NATIVE_UINT;
+  else if(*typecode==5)
+    dtype_id = H5T_NATIVE_ULLONG;
+
   *nread = read_dataset(*snap, *itype, name, dtype_id, buf, *n);
 }
 

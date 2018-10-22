@@ -387,10 +387,20 @@ static PyObject *_read_eagle_read_dataset(PyObject *self, PyObject *args)
       hdf5_type = H5T_NATIVE_FLOAT;
       result = (PyArrayObject *) PyArray_SimpleNew(rank, dims, NPY_FLOAT);
     }
-  else
+  else if(tc==t_double)
     {
       hdf5_type = H5T_NATIVE_DOUBLE;
       result = (PyArrayObject *) PyArray_SimpleNew(rank, dims, NPY_DOUBLE);
+    }
+  else if(tc==t_uint)
+    {
+      hdf5_type = H5T_NATIVE_UINT;
+      result = (PyArrayObject *) PyArray_SimpleNew(rank, dims, NPY_UINT);
+    }
+  else if(tc==t_ulong_long)
+    {
+      hdf5_type = H5T_NATIVE_ULLONG;
+      result = (PyArrayObject *) PyArray_SimpleNew(rank, dims, NPY_ULONGLONG);
     }
 
   /* Get a pointer to the data buffer */
@@ -476,10 +486,20 @@ static PyObject *_read_eagle_read_extra_dataset(PyObject *self, PyObject *args)
       hdf5_type = H5T_NATIVE_FLOAT;
       result = (PyArrayObject *) PyArray_SimpleNew(rank, dims, NPY_FLOAT);
     }
-  else
+  else if(tc==t_double)
     {
       hdf5_type = H5T_NATIVE_DOUBLE;
       result = (PyArrayObject *) PyArray_SimpleNew(rank, dims, NPY_DOUBLE);
+    }
+  else if(tc==t_uint)
+    {
+      hdf5_type = H5T_NATIVE_UINT;
+      result = (PyArrayObject *) PyArray_SimpleNew(rank, dims, NPY_UINT);
+    }
+  else if(tc==t_ulong_long)
+    {
+      hdf5_type = H5T_NATIVE_ULLONG;
+      result = (PyArrayObject *) PyArray_SimpleNew(rank, dims, NPY_ULONGLONG);
     }
 
   /* Get a pointer to the data buffer */
