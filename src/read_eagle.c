@@ -1312,6 +1312,7 @@ int get_extra_dataset_info(EagleSnapshot *snap, int itype, char *dset_name, Type
   hid_t dtype_id;
   H5T_class_t dclass;
   size_t dsize;
+  H5T_sign_t sign;
 
   /* Range check on itype */
   if(itype<0 || itype>5)
@@ -1360,12 +1361,24 @@ int get_extra_dataset_info(EagleSnapshot *snap, int itype, char *dset_name, Type
   *rank = H5Sget_simple_extent_ndims(dspace_id); 
   dclass = H5Tget_class(dtype_id);
   dsize = H5Tget_size(dtype_id);
+  sign = H5Tget_sign(dtype_id);
+
   if(dclass==H5T_INTEGER)
     {
-      if(dsize <= 4)
-	*typecode = t_int;
+      if(sign==H5T_SGN_NONE)
+        {
+          if(dsize <= 4)
+            *typecode = t_uint;
+          else
+            *typecode = t_ulong_long;
+        }
       else
-	*typecode = t_long_long;
+        {
+          if(dsize <= 4)
+            *typecode = t_int;
+          else
+            *typecode = t_long_long;
+        }
     }
   else if(dclass==H5T_FLOAT)
     {

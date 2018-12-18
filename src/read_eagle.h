@@ -42,7 +42,9 @@ typedef enum e_TypeCode
     t_int       = 0,
     t_long_long = 1,
     t_float     = 2,
-    t_double    = 3
+    t_double    = 3,
+    t_uint      = 4,
+    t_ulong_long = 5
   } TypeCode;
 
 /* Return a pointer to the last error message */
@@ -180,7 +182,8 @@ long long read_extra_dataset(EagleSnapshot *snap, int itype, char *name, hid_t h
 #define read_dataset_float(snap,itype,name,buf,n) read_extra_dataset(snap,itype,name,H5T_NATIVE_FLOAT,buf,n,NULL)
 #define read_dataset_double(snap,itype,name,buf,n) read_extra_dataset(snap,itype,name,H5T_NATIVE_DOUBLE,buf,n,NULL)
 #define read_dataset_long_long(snap,itype,name,buf,n) read_extra_dataset(snap,itype,name,H5T_NATIVE_LLONG,buf,n,NULL)
-
+#define read_dataset_unsigned_int(snap,itype,name,buf,n) read_extra_dataset(snap,itype,name,H5T_NATIVE_UINT,buf,n,NULL)
+#define read_dataset_unsigned_long_long(snap,itype,name,buf,n) read_extra_dataset(snap,itype,name,H5T_NATIVE_ULLONG,buf,n,NULL)
 
 /*
   Return information about a dataset given its name
