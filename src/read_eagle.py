@@ -7,6 +7,8 @@
 #
 import _read_eagle
 
+from os.path import exists
+
 class EagleSnapshotClosedException(Exception):
     pass
 
@@ -15,6 +17,15 @@ class EagleSnapshot:
     
     def __init__(self, fname):
         """Open a new snapshot"""
+        # First, check if the file exists as otherwise we call into the
+        # C HDF5 library and get lots of warnings.
+        if not exists(fname):
+            # Need to set self.open as it's checked in __del__.
+            self.open = False
+            raise FileNotFoundError(
+                "Unable to open file %s" % fname
+            )
+    
         try:
             (self.snap, n0, n1, n2, n3, n4, n5, 
              self.boxsize, self.numfiles, self.hashbits) = _read_eagle.open_snapshot(fname)
