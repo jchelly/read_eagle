@@ -5,9 +5,14 @@
 #
 # python ./setup.py install --prefix=<dir>
 #
-
-# Edit this to set the location of HDF5. This directory should
-# contain the HDF5 lib/ and include/ directories.
+# Edit the line below to set the location of HDF5. This directory
+# should contain the HDF5 lib/ and include/ directories. If the HDF5
+# bin directory is in your $PATH then you can use
+#
+# h5cc -showconfig
+#
+# to determine where HDF5 is installed.
+#
 hdf5_location = "/usr/"
 
 import sys
