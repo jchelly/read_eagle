@@ -1,5 +1,15 @@
 # Read routines for Peano-Hilbert key sorted Eagle snapshots
 
+## Note about language support
+
+This code can be used with C, Fortran, IDL or Python programs.
+If you only need python support then consider using 
+[pyread_eagle](https://github.com/kyleaoman/pyread_eagle), which
+implements the same API but is written entirely in python so it 
+should be easier to install.
+
+## Introduction
+
 These can be used if Gadget was run with the -DEAGLE_SORT_OUTPUT
 flag enabled. They provide a quick way to read in spatial regions
 without having to read all the data or even open all of the files.
