@@ -134,7 +134,7 @@ def read_region_index(basedir, snapnum, region, itype, datasets):
 if __name__ == "__main__":
 
     # Test the code on a few regions
-    basedir  = "/cosma5/data/Eagle/DataRelease/L0025N0376/PE/REFERENCE/data/"
+    basedir  = "/cosma7/data/Eagle/DataRelease/L0025N0376/PE/REFERENCE/data/"
     datasets = ("Coordinates","ParticleIDs","Velocity")
     itype    = 1
     snapnum  = 28

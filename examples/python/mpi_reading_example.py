@@ -23,7 +23,7 @@ comm_rank = comm.Get_rank()
 comm_size = comm.Get_size()
     
 # Name of one file from the snapshot
-basedir = "/gpfs/data/Eagle/ProductionRuns/L0025N0376/Z0p10_W1p00_E_3p0_0p3_ALPHA1p0e4_AGNdT8p50/data/"
+basedir = "/cosma7/data/Eagle/ScienceRuns/Planck1/L0025N0376/PE/REFERENCE/data/"
 fname   = basedir + "snapshot_028_z000p000/snap_028_z000p000.0.hdf5"
 
 # Open snapshot

@@ -4,7 +4,7 @@
 ;
 
 ; Location where tar file with snapshots was unpacked
-basedir = "/gpfs/data/jch/tmp/"
+basedir = "./tmp/"
 
 ; The snapshot to read is identified by specifying the name of one of the snapshot files
 fname = basedir+"/RefL0012N0188/snapshot_028_z000p000/snap_028_z000p000.0.hdf5"
