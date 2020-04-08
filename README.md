@@ -1,6 +1,4 @@
-
-Read routines for Peano-Hilbert key sorted Eagle snapshots
-----------------------------------------------------------
+# Read routines for Peano-Hilbert key sorted Eagle snapshots
 
 These can be used if Gadget was run with the -DEAGLE_SORT_OUTPUT
 flag enabled. They provide a quick way to read in spatial regions
@@ -14,11 +12,11 @@ of the start of each cell in the file.
 
 The procedure to read in data is as follows:
 
-- Open the snapshot by specifying the name of one file
-- Flag the grid cells to be read in by calling select_region() one or
-  more times.
-- Call read_dataset once for each quantity to be read, specifying
-  which particle type to read and the HDF5 dataset name
+  * Open the snapshot by specifying the name of one file
+  * Flag the grid cells to be read in by calling select_region() one or
+    more times.
+  * Call read_dataset once for each quantity to be read, specifying
+    which particle type to read and the HDF5 dataset name
 
 You can then either close the snapshot or call clear_selection() to
 read in a different region.
@@ -32,48 +30,45 @@ and Python. There's also a pure IDL version since calling the C
 routines from IDL is impractical due to library version issues.
 
 
-Installing the python module
-----------------------------
+## Installing the python module
 
 To install the python module:
 
- - Edit setup.py to specify the location of your HDF5 installation
- - To install to your home directory, run
-
+ * Edit setup.py to specify the location of your HDF5 installation
+ * To install to your home directory, run
+```
      python ./setup.py install --user
-
+```
    or to install elsewhere
-
+```
      python ./setup.py install --prefix=/path/to/install/dir/
-
+```
 If you use the --prefix option you'll probably need to set the environment
 variable PYTHONPATH so that python can find the module.
 
 
-Compiling the library and examples for C and Fortran
-----------------------------------------------------
+## Compiling the library and examples for C and Fortran
 
 The library is compiled using cmake. If your HDF5 installation is in
 an unusual location you can specify it with cmake's CMAKE_PREFIX_PATH
 option. E.g.:
-
+```
   mkdir build
   cd build
   cmake .. -DCMAKE_PREFIX_PATH=/path/to/hdf5/installation
   make
-
+```
 The path you pass in should contain the HDF5 lib and include directories.
 This will produce the following files:
-
+```
   build/lib/libread_eagle.so   - the shared library for reading Eagle snapshots
   build/include/read_eagle.h   - header file needed to call the library from C
   build/include/read_eagle.mod - module needed to call the library from Fortran
   build/bin/*                  - compiled example programs in C and Fortran
+```
 
-
-Example usage in C:
--------------------
-
+## Example usage in C
+```
   #include "read_eagle.h"
 
   EagleSnapshot *snap;
@@ -98,11 +93,10 @@ Example usage in C:
 
   /* Close snapshot */
   close_snapshot(snap);
+```
 
-
-Example usage in Fortran:
--------------------------
-
+## Example usage in Fortran
+```
   use read_eagle
 
   type(EagleSnapshot) :: snap
@@ -128,11 +122,11 @@ Example usage in Fortran:
 
   ! Close snapshot
   call close_snapshot(snap)
+```
 
+## Example usage in Python
 
-Example usage in Python:
-------------------------
-
+```
 import read_eagle
 
 snap = read_eagle.EagleSnapshot("./snap_020.0.hdf5")
@@ -140,11 +134,11 @@ snap.select_region(4.0, 5.0, 2.0, 3.0, 3.0, 4.0)
 pos = snap.read_dataset(0, "Coordinates")
 ids = snap.read_dataset(0, "ParticleIDs")
 del snap
+```
 
+## Example usage in IDL
 
-Example usage in IDL:
----------------------
-
+```
 .run read_eagle.pro
 snap = open_snapshot("./snap_020.0.hdf5")
 select_region, snap, 4.0, 5.0, 2.0, 3.0, 3.0, 4.0
@@ -154,12 +148,11 @@ if n gt 0 then begin
   ids = read_dataset(snap, 0, "ParticleIDs")
 endif
 close_snapshot, snap
+```
 
+## Error handling
 
-Error handling
---------------
-
-In C:
+### In C
 
 Default behaviour is to abort if an error occurs, e.g. if a file can't
 be read or memory allocation fails. If you call abort_on_error(0)
@@ -169,34 +162,33 @@ open_snapshot   - returns a null pointer on failure
 count_particles - returns a negative number on failure
 read_dataset    - returns a negative number on failure
 
-In Fortran:
+### In Fortran
 
 The routines which can fail (open_snapshot, count_particles and
 read_dataset) take an optional integer parameter 'iostat'. If this
 parameter is not specified the routines will abort on errors. If it
 is specified it will return zero on success, non-zero otherwise.
 
-In Python:
+### In Python
 
 If a routine fails it will raise an exception.
 
-In IDL:
+### In IDL
 
 The IDL routines always abort in case of errors.
 
 
 
-Description of the routines and parameters
-------------------------------------------
+## Description of the routines and parameters
 
+### open_snapshot
 
-* open_snapshot
----------------
-
+```
 C      :  EagleSnapshot *snap = open_snapshot(char *fname)
 F90    :  snap = open_snapshot(fname [, iostat=...])
 Python :  snap = read_eagle.EagleSnapshot(fname)
 IDL    :  snap = open_snapshot(fname)
+```
 
 This opens the snapshot which contains the specified file. The returned
 value 'snap' must be deallocated using a call to close_snapshot.
@@ -210,19 +202,21 @@ Parameters
 
 Return value
 
+```
   C     : pointer to a newly allocated EagleSnapshot, or NULL on failure
   F90   : an instance of the eaglesnapshot derived type
   Python: an instance of the EagleSnapshot class
   IDL   : a struct containing data necessary to read the snapshot
+```
 
+### close_snapshot
 
-* close_snapshot
-----------------
-
+```
 C       : close_snapshot(EagleSnapshot *snap)
 F90     : call close_snapshot(snap)
 python  : del snap
 IDL     : close_snapshot, snap
+```
 
 Deallocates memory associated with the snap object from open_snapshot.
 Not necessary in python - do 'del snap' or just let the snap variable go
@@ -233,9 +227,9 @@ Parameters
   - snap: the object returned by open_snapshot
 
 
-* select_region
----------------
+### select_region
 
+```
 C       : select_region(EagleSnapshot *snap, double xmin, double xmax,
                                              double ymin, double ymax,
                                              double zmin, double zmax)
@@ -243,6 +237,7 @@ F90     : call select_region(snap, xmin, xmax, ymin, ymax, zmin, zmax,
                              [, iostat=...])
 python  : snap.select_region(xmin, xmax, ymin, ymax, zmin, zmax)
 IDL     : select_region, snap, xmin, xmax, ymin, ymax, zmin, zmax
+```
 
 All grid cells overlapping the specified region are flagged to be read
 in by subsequent read_dataset calls. You can call select_region multiple
@@ -264,9 +259,9 @@ Parameters
   The coordinates are doubles in C and reals in Fortran.
 
 
-* select_grid_cells
--------------------
+### select_grid_cells
 
+```
 C       : select_grid_cells(EagleSnapshot *snap, int ixmin, int ixmax,
                            		         int iymin, int iymax,
                                                  int izmin, int izmax)
@@ -274,6 +269,7 @@ F90     : call select_grid_cells(snap, ixmin, ixmax, iymin, iymax, izmin, izmax,
                                  [, iostat=...])
 python  : snap.select_grid_cells(ixmin, ixmax, iymin, iymax, izmin, izmax)
 IDL     : Not implemented
+```
 
 All grid cells in the specified range of grid coordinates are flagged to
 be read in by subsequent read_dataset calls. You can call select_grid_cells
@@ -299,13 +295,14 @@ Parameters
   The coordinates are ints in C and default integers in Fortran.
 
 
-* count_particles
+### count_particles
 -----------------
-
+```
 C      : int n = count_particles(EagleSnapshot *snap, int itype)
 F90    : n = count_particles(snap, itype [, iostat=...])
 Python : n = snap.count_particles(itype)
 IDL    : n = count_particles(itype)
+```
 
 This returns the number of particles of the specified type which will be
 read by the next read_dataset call. Note that only whole grid cells can
@@ -330,15 +327,15 @@ Return value
   The number of particles to be read in
 
 
-* get_particle_locations
-------------------------
-
+### get_particle_locations
+```
 C      : int n = get_particle_locations(EagleSnapshot *snap, int itype,
                                         int *file_index, int *file_offset,
                                         size_t nmax);
 F90    : n = get_particle_locations(snap, itype, file_index, file_offset [, iostat=...])
 Python : file_index, file_offset = snap.get_particle_locations(itype)
 IDL    : Not implemented
+```
 
 This returns two arrays which each have one element for each selected
 particle. file_index contains the index of the file each particle is in.
@@ -360,9 +357,9 @@ Return value
   file_offset - integer array with position of each particle in its file
 
 
-* read_dataset
---------------
+### read_dataset
 
+```
 C       : int read_dataset_int(EagleSnapshot *snap, int itype, char *name, int *buf, size_t n);
           int read_dataset_long_long(EagleSnapshot *snap, int itype, char *name, long long *buf, size_t n);
           int read_dataset_float(EagleSnapshot *snap, int itype, char *name, float *buf, size_t n);
@@ -370,6 +367,7 @@ C       : int read_dataset_int(EagleSnapshot *snap, int itype, char *name, int *
 Fortran : call read_dataset(snap, itype, name, buf [, iostat=...])
 Python  : buf = snap.read_dataset(itype, name)
 IDL     : buf = read_dataset(snap, itype, name)
+```
 
 This reads in the specified dataset for all particles of type itype in the
 selected region(s). Use repeated calls to read in multiple datasets.
@@ -401,13 +399,13 @@ Return value
   The number of particles read in
 
 
-* clear_selection
------------------
-
+### clear_selection
+```
 C        : void clear_selection(EagleSnapshot *snap)
 Fortran  : call clear_selection(snap)
 Python   : snap.clear_selection()
 IDL      : clear_selection, snap
+```
 
 Parameters:
 
@@ -423,13 +421,13 @@ in a region and you want to read a different region you should call
 clear_selection() before calling select_region() again.
 
 
-* split_selection
------------------
-
+### split_selection
+```
 C        : int split_selection(EagleSnapshot *snap, int ThisTask, int NTask)
 Fortran  : call split_selection(snap, ThisTask, NTask [, iostat=...])
 Python   : snap.split_selection(ThisTask, NTask)
 IDL      : Not implemented
+```
 
 Parameters:
 
